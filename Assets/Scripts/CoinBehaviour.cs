@@ -27,7 +27,7 @@ public class CoinBehaviour : MonoBehaviour
 
     public void Collect(PlayerBehaviour player)
     {
-        player.ModifyScore(coinValue);
+        GameManager.instance.ModifyScore(coinValue); 
         Destroy(gameObject);
     }
 }

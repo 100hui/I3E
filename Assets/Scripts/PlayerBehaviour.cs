@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class PlayerBehaviour : MonoBehaviour
 {
@@ -22,6 +23,15 @@ public class PlayerBehaviour : MonoBehaviour
 
     [SerializeField]
     float interactionDistance = 5f;
+
+    [SerializeField]
+    TextMeshProUGUI scoreText;
+
+    void Start()
+    {
+        scoreText.text = "Score: " + score;
+        GameManager.instance.TestFunction();
+    }
 
     void Update()
     {
@@ -133,6 +143,7 @@ public class PlayerBehaviour : MonoBehaviour
     {
         score += amount;
         Debug.Log("Score: " + score);
+        scoreText.text = "Score: " + score; // Update the score text
     }
 
     void OnTriggerExit(Collider other)
