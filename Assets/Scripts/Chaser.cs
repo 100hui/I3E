@@ -9,6 +9,10 @@ public class Chaser : MonoBehaviour
     [SerializeField]
     Transform targetTransform;
 
+    [SerializeField]
+    Transform[] patrolPoints; // Array of patrol points (set in Inspector)
+    int patrolIndex = 0; // Current patrol point index
+
     public string currentState;
 
     void Awake()
@@ -35,6 +39,9 @@ public class Chaser : MonoBehaviour
 
     IEnumerator Idle()
     {
+        float idleTime = 2f; // Time to stay idle before patrolling
+        float timer = 0f;
+
         while (currentState == "Idle")
         {
             // Perform idle behavior here
@@ -43,7 +50,48 @@ public class Chaser : MonoBehaviour
                 // If there is a target, go to the chasing state
                 StartCoroutine(SwitchState("ChaseTarget"));
             }
+            // Wait for the idle time, then start patrolling
+            timer += Time.deltaTime;
+            if (timer >= idleTime)
+            {
+                StartCoroutine(SwitchState("Patrol"));
+            }
             yield return null; // Wait for the next frame
+        }
+    }
+
+    IEnumerator Patrol()
+    {
+        while (currentState == "Patrol")
+        {
+            // If player appears, switch to chase immediately
+            if (targetTransform != null)
+            {
+                StartCoroutine(SwitchState("ChaseTarget"));
+                yield break;
+            }
+
+            // If no patrol points assigned, go idle
+            if (patrolPoints.Length == 0)
+            {
+                StartCoroutine(SwitchState("Idle"));
+                yield break;
+            }
+
+            // Move to current patrol point
+            myAgent.SetDestination(patrolPoints[patrolIndex].position);
+
+            // Check if arrived at patrol point
+            if (!myAgent.pathPending && myAgent.remainingDistance <= myAgent.stoppingDistance)
+            {
+                // Move to next patrol point (loop around)
+                patrolIndex = (patrolIndex + 1) % patrolPoints.Length;
+
+                // Switch back to idle after reaching patrol point
+                StartCoroutine(SwitchState("Idle"));
+            }
+
+            yield return null; // Wait for next frame
         }
     }
 
